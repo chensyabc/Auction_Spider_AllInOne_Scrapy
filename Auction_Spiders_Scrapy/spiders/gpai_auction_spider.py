@@ -85,7 +85,6 @@ class GPaiAuctionSpider(scrapy.Spider):
                 item['Increment'] = increment
                 item['CreatedOn'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                 item['UpdatedOn'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                item['UpdatedOn'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                 item['StatusId'] = response.meta['restate']
                 print('2, yield ' + response.url)
                 yield item
@@ -107,8 +106,13 @@ class GPaiAuctionSpider(scrapy.Spider):
     def closed(self, reason):
         self.end_time = datetime.now()
         duration = (self.end_time - self.start_time).seconds
-        print('duration: ' + str(duration) + 's')
-        print('each page duration: ' + str(duration/self.total_page_count) + 's')
+        print('total duration: ' + str(duration) + 's')
+        print('total page: ' + str(self.total_page_count))
+        if self.total_page_count == 0:
+            each_page_duration = 0
+        else:
+            each_page_duration = duration / self.total_page_count
+        print('each page duration: ' + str(each_page_duration) + 's')
         print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())) + ': total parse: ' + str(self.parse_count) +' retry parse: ' + str(self.retry_count) + ' success parse: ' + str(self.parse_count - self.retry_count - self.failure_count) + ' failure count: ' + str(self.failure_count))
 
     # def get_court_data(self, response, court_item_regex):
