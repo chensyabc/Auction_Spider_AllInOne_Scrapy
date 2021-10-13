@@ -20,6 +20,7 @@ class AliAuctionSpider(scrapy.Spider):
     start_time = time.time()
     end_time = time.time()
     # scrapy crawl ali_auction_spider --nolog
+    # change settings.py cookie
 
     def parse(self, response):
         self.start_time = datetime.now()
