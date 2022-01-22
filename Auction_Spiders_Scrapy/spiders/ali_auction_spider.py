@@ -78,6 +78,8 @@ class AliAuctionSpider(scrapy.Spider):
                     reason = "due to expired cookie: 将用户正常页面写入到 x5referer ，以备后续跳转返回"
                     # TODO: try with call request with setting to another cookie. 3/29/2021
                     yield scrapy.Request(url=response.url, callback=self.parse_auction_list, meta=response.meta)
+                if selector.extract().find('很抱歉，没有您要找的标的物，') > 0:
+                    reason = 'due to need drag in view: 很抱歉，没有您要找的标的物，'
                 # elif selector.extract().find('霸下通用') > 0:
                 #     reason = "due to blabla verification code: 霸下通用 web 页面 - 验证码"
                 #     # TODO: try with call request with setting to another cookie. 8/22/2021
@@ -97,7 +99,7 @@ class AliAuctionSpider(scrapy.Spider):
             # print(detail_trs_xpath.extract_first().replace('\n', '').replace('\r', '').replace('\t', ''))
             current_price = selector.xpath(".//span[@class='pm-current-price J_Price']/em/text()").extract_first().strip().replace(',', '')
             content = detail_trs_xpath[0].xpath("td/span/text()").extract_first()
-            if content == "保 证 金":
+            if content == "保证金":
                 print("   condition a: " + content)
                 start_price = detail_trs_xpath[1].xpath("td/span[@class='pay-price']/span/text()").extract_first().strip().replace(',', '')
                 cash_deposit = detail_trs_xpath[0].xpath("td/span/span[@class='J_Price']/text()").extract_first().strip().replace(',', '')
@@ -108,6 +110,8 @@ class AliAuctionSpider(scrapy.Spider):
                 print("   condition b: " + content)
                 start_price = detail_trs_xpath[2].xpath("td/span[@class='pay-price']/span/text()").extract_first().strip().replace(',', '')
                 cash_deposit = detail_trs_xpath[0].xpath("td[@class='J_PaySellOff pay-selloff']/span/span[@class='J_Price']/text()").extract_first().strip().replace(',', '')
+                access_price = detail_trs_xpath[1].xpath("td/span/span[@class='J_Price']/text()").extract_first().strip().replace(',', '')
+                fare_increase = detail_trs_xpath[2].xpath("td/span/span[@class='J_Price']/text()").extract_first().strip().replace(',', '')
                 # print(cash_deposit)
             # print('pm-current-price: '+str(selector.xpath(".//span[@class='pm-current-price J_Price']")))
             item = AliAuctionSpiderScrapyItem()
@@ -127,6 +131,8 @@ class AliAuctionSpider(scrapy.Spider):
             reason = ''
             if selector.extract().find('亲，小二正忙，滑动一下马上回来') > 0:
                 reason = 'due to need drag in view: 亲，小二正忙，滑动一下马上回来'
+            if selector.extract().find('霸下通用 web 页面') > 0:
+                reason = 'due to need drag in view: 霸下通用 web 页面'
             print("2, parse_auction_detail failure detail -- code: %s detail: " % (ex.args[0]) + ' reason: ' + reason)
             self.failure_count += 1
 
